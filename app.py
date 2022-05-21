@@ -29,13 +29,16 @@ if __name__ == "__main__":
     sim2 = simulation(
         [Pawn("black", [5, 2]), Pawn("black", [5, 4]), Pawn("black", [3, 2]), Pawn("black", [3, 4])]
     )
+    sim3 = simulation(
+        [Pawn("black", [5, 2]), Pawn("black", [5, 4]), Pawn("black", [3, 2]), Pawn("black", [3, 4])]
+    )
     print_board(sim2)
     # get_available_captures(sim,sim[0])
     c = get_captures(sim2, Pawn("white", [6, 3]))
     # for k in range(len(b)):
     #     print("b",b[k])
     # pass
-    print("c", c[0])
+    print("c", c)
     # pawns = initialize_board()
     # g: GameTree = GameTree(depth=6)
     # print(6)
