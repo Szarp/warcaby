@@ -97,14 +97,40 @@ def get_available_captures(pawns, pawn):
         return (captured_enemies_index, available_capture_moves)
     positions = available_capture_positions(pawn)
     for pos in positions:
-        enemy_position = sum_positions(zip(pos, pawn.position))
-        i, other_pawn = get_pawn(pawns, enemy_position)
-        if other_pawn != None:
-            if other_pawn.color != pawn.color:
-                position_after_capture = sum_positions(zip(enemy_position, pos))
-                if is_on_board(position_after_capture) and is_free(pawns, position_after_capture):
-                    available_capture_moves.append(position_after_capture)
-                    captured_enemies_index.append(i)
+        if pawn.is_queen:
+            enemy_position = pawn.position
+            while True:
+                enemy_position = sum_positions(zip(pos, enemy_position))
+                if not is_on_board(enemy_position):
+                    break
+                i, other_pawn = get_pawn(pawns, enemy_position)
+                if other_pawn != None:
+                    if other_pawn.is_captured == True:
+                        break
+                    if other_pawn.color != pawn.color:
+                        position_after_capture = enemy_position
+                        while True:
+                            position_after_capture = sum_positions(zip(position_after_capture, pos))
+                            if is_on_board(position_after_capture):
+                                if is_free(pawns, position_after_capture):
+                                    available_capture_moves.append(position_after_capture)
+                                    captured_enemies_index.append(i)
+                                else:
+                                    break
+                            else:
+                                break
+        else:
+            enemy_position = sum_positions(zip(pos, pawn.position))
+            i, other_pawn = get_pawn(pawns, enemy_position)
+            if other_pawn != None:
+                if other_pawn.is_captured == True:
+                    continue
+                if other_pawn.color != pawn.color:
+                    position_after_capture = sum_positions(zip(enemy_position, pos))
+                    if is_on_board(position_after_capture) and is_free(pawns, position_after_capture):
+                        available_capture_moves.append(position_after_capture)
+                        captured_enemies_index.append(i)
+    
     return (captured_enemies_index, available_capture_moves)
 
 
@@ -118,12 +144,14 @@ def get_captures(pawns, pawn, previous_capture: list = []):
     if len(available_capture_moves) > 0:
         for k in range(len(available_capture_moves)):
             uncaptured_pawns = pawns.copy()
-            del uncaptured_pawns[captured_enemies_index[k]]
+            uncaptured_pawns[captured_enemies_index[k]].is_captured = True
             move_pawn(pawn, available_capture_moves[k])  # [[0,0]]
             prev = previous_capture.copy()
             prev.append(available_capture_moves[k])
             # print("moves2",prev)
             # print("prev",prev.copy(), "uncaptured",len(uncaptured_pawns))
+            # pawn_position = pawn.position
+            # move_pawn(calc)
             next_captures = get_captures(uncaptured_pawns, pawn, prev.copy())
             # print("next captures",next_captures.copy())
             if len(next_captures) > 0:
@@ -226,7 +254,7 @@ def get_queen_captures(pawn, pawns, positions):
                     if is_on_board(calculated_position) and not get_pawn(
                         pawns, calculated_position
                     ):
-                        fields.append(calculated_position)
+                        fields.append(sub_positions(zip(pawn.position, calculated_position)))
                         break
 
     return fields
@@ -235,6 +263,8 @@ def get_queen_captures(pawn, pawns, positions):
 def sum_positions(zipped_positions):
     return [x + y for (x, y) in zipped_positions]
 
+def sub_positions(zipped_positions):
+    return [x - y for (x, y) in zipped_positions]
 
 def is_on_board(position) -> bool:
     return position[0] >= 0 and position[0] <= 7 and position[1] >= 0 and position[1] <= 7
