@@ -49,23 +49,24 @@ def get_pawn_moves(pawns, pawn):
 	if (captures):
 		return captures
 	return get_forward_moves(pawns, pawn)
-
-def get_captures(pawns, pawn):
+def available_capture_positions(pawn):
 	positions = []
+	vectors = [[-1,1],[-1,1],[1,-1],[1,1]]
+	for position in vectors:
+		calculated_position = sum_positions(zip(position, pawn.position))
+		if (is_on_board(calculated_position)):
+			positions.append(position)
+	return positions
+def get_captures(pawns, pawn):
+	positions = available_capture_positions(pawn)
 	fields = []
-	positions.append([-1, -1])
-	positions.append([-1, 1])
-	positions.append([1, -1])
-	positions.append([1, 1])
 	for position in positions:
 		calculated_position = sum_positions(zip(position, pawn.position))
-		if (not in_between_board(calculated_position)):
-			continue
 		other_pawn = get_pawn(pawns, calculated_position)
 		if (other_pawn):
 			if (other_pawn.color != pawn.color):
 				calculated_position = sum_positions(zip(calculated_position, position))
-				if (in_between_board(calculated_position) and get_pawn(pawns, calculated_position)):
+				if (is_on_board(calculated_position) and get_pawn(pawns, calculated_position)):
 					fields.append(calculated_position)
 
 	return fields
@@ -86,7 +87,7 @@ def get_forward_moves(pawn, pawns):
 		positions.append([-1, 1])
 	for position in positions:
 		calculated_position = sum_positions(zip(position, pawn.position))
-		if (not in_between_board(calculated_position)):
+		if (not is_on_board(calculated_position)):
 			continue
 		if (get_pawn(pawns, calculated_position)):
 			continue
@@ -97,5 +98,5 @@ def get_forward_moves(pawn, pawns):
 def sum_positions(zipped_positions):
 	return [x + y for(x,y) in zipped_positions]
 
-def in_between_board(position):
+def is_on_board(position):
 	return (position[0] >= 0 and position[0] <= 7 and position[1] >= 0 and position[1] <= 7)
