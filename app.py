@@ -33,22 +33,32 @@ if __name__ == "__main__":
         [Pawn("black", [5, 2]),Pawn("black", [5, 6]), Pawn("black", [5, 4]), Pawn("black", [3, 2]), Pawn("black", [3, 4])]
     )
     sim4 = simulation(
-        [Pawn("black", [4, 3]), Pawn("black", [1, 2]), Pawn("black", [5, 6])]
+        [Pawn("black", [4, 5]), Pawn("black", [1, 2]), Pawn("black", [5, 6])]
     )
     sim5 = simulation(
         [Pawn("black", [4, 3]), Pawn("black", [3, 6]), Pawn("black", [1, 4])]
     )
+    sim6 = simulation(
+        [Pawn("black", [4, 1]), Pawn("black", [2, 3]), Pawn("black", [4, 5]), Pawn("white", [5, 0]), Pawn("white", [5, 6])]
+    )
         # get_available_captures(sim,sim[0])
-    queen = Pawn("white", [6, 1])
+    queen = Pawn("white", [5, 2])
     queen.is_queen = True
-    print_board(sim5+[queen])
+    print_board(sim5)
+    # temp = [[2, 5], [4, 7]]
+    # temp.extend([[2, 5], [0, 3]])
+    # print(temp)
     # _, c = get_available_captures(sim4,queen)
     # print(c)
-    c = get_captures(sim5, queen)
+    print(get_all_possible_moves('black', sim5+[queen]))
+    # print(get_pawn_between(sim6, [7,2], [2,7]).print())
+    # print(sim4+[queen])
+    # print(get_pawn_moves(sim4, sim4[0]))
+    # c = get_captures(sim5, queen)
+    # print("c", c)
     # for k in range(len(b)):
     #     print("b",b[k])
     # pass
-    print("c", c)
     # pawns = initialize_board()
     # g: GameTree = GameTree(depth=6)
     # print(6)
@@ -74,15 +84,15 @@ if __name__ == "__main__":
 
 
     ## interfeejs 
-    #flatten
-    # is_capture_move, moves = get_all_possible_moves (color) -> zwraca tylko bicia albo tylko ruchy
+    #flatten - done
+    # is_capture_move, moves = get_all_possible_moves (color) -> zwraca tylko bicia albo tylko ruchy - done
     # board = create_new_board_from_move(board,move)
     # evaluate(board) ->  I choose move nr 3 ([0,2])
-    # promotion (pawn)
-    # game_status(board) ->win/lose/draw
-    # evaluate(board) 
-    # perform_capture_move
-    # perform_positional_move
+    # promotion (pawn) - done
+    # game_status(board) ->win/lose/draw - done
+    # evaluate(board) - done
+    # perform_capture_move - done
+    # perform_positional_move -done
     
 
 	# def move_limit_reached(self):

@@ -31,6 +31,108 @@ def simulation(pawns):
         board.append(pawn)
     return board
 
+def can_color_capture(color, pawns):
+    color_pawns = get_color_pawns(color, pawns)
+    for pawn in color_pawns:
+        _, capture = get_available_captures(pawns, pawn)
+        if capture:
+            return True
+    return False
+
+def get_all_possible_moves(color, pawns):
+    all_moves = []
+    color_pawns = get_color_pawns(color, pawns)    
+    can_capture = can_color_capture(color, pawns)
+    max_captures = 0
+    for pawn in color_pawns:
+        is_capture, max, moves = get_pawn_moves(pawns, pawn)
+        if can_capture:
+            if not is_capture:
+                continue
+            if max > max_captures:
+                all_moves = []
+                max_captures = max
+            if max == max_captures:
+                for move in moves:
+                    all_moves.append([True, pawn,move])
+        else:
+            for move in moves:
+                all_moves.append([False, pawn, move])
+    return all_moves
+
+def get_pawn_between(pawns, first_position, second_position):
+    distance = sub_positions(zip(second_position, first_position))
+    x_sign = 1 if distance[0] > 0 else -1
+    y_sign = 1 if distance[1] > 0 else -1
+    vector = [x_sign, y_sign]
+    calculated_position = first_position
+    calculated_position = sum_positions(zip(calculated_position, vector))
+    while is_on_board(calculated_position):
+        _, pawn = get_pawn(pawns, calculated_position)
+        if (pawn):
+            return pawn
+        calculated_position = sum_positions(zip(calculated_position, vector))
+    return 
+
+def evaluate(board, moves):
+    capture, pawn, moves = moves
+    if (capture):
+        for move in moves:
+            perform_capture(board, pawn, move)
+    else:
+        perform_move(pawn, moves[0])
+    promotion(pawn)
+    
+def promotion(pawn):
+    if pawn.color == 'white' and pawn.position[0] == 0:
+        pawn.is_queen = True
+    if pawn.color == 'black' and pawn.position[0] == 7:
+        pawn.is_queen = True
+
+       
+
+def perform_capture(board, pawn, position):
+    del board[get_pawn_between(board,pawn.position, position)]
+    move_pawn(pawn, position)
+
+def perform_move(pawn, position):
+    move_pawn(pawn, position)
+
+def game_status(pawns, queen_moves=0):
+    blacks = get_color_pawns('black', pawns)
+    whites = get_color_pawns('white', pawns)
+    can_white_move = False
+    can_black_move = False
+    
+    if (not blacks):
+        return 'white'
+    if (not whites):
+        return 'black'
+
+    for pawn in blacks:
+        if (get_pawn_moves(pawns, pawn)):
+            can_black_move = True
+            break
+
+    for pawn in whites:
+        if (get_pawn_moves(pawns, pawn)):
+            can_white_move = True
+            break
+    
+    if (can_black_move and not can_white_move):
+        return 'black'
+    
+    if (not can_black_move and can_white_move):
+        return 'white'
+    
+    if (not can_black_move and not can_white_move):
+        return 'draw'
+    
+    if (queen_moves >= 15):
+        return 'draw'
+    
+    return;
+
 
 # LUUKIER SYNKTAKTYCZNY ;)
 def print_board(pawns) -> None:
@@ -71,13 +173,38 @@ def is_free(pawns, position):
 def move_pawn(pawn, position) -> None:
     pawn.position = position
 
+def get_most_captures(pawns, pawn):
+    temp_pawn = copy.deepcopy(pawn)
+    pawns.remove(pawn)
+    captures = get_captures(pawns, temp_pawn)
+    pawns.append(temp_pawn)
+    if not captures:
+        return 0, None
+    captures = flatten(captures)
+    max = 0
+    longest_captures = []
+    for capture in captures:
+        if len(capture) > max:
+            max = len(capture)
+            longest_captures = []
+        if len(capture) == max:
+            longest_captures.append(capture)
+    return max, longest_captures
+
+def flatten(moves):
+    all_moves = []
+    if type(moves[0][0]) is not list:
+        return [moves]
+    for move in moves:
+        all_moves.extend(flatten(move))        
+    return all_moves
 
 def get_pawn_moves(pawns, pawn):
     # jak moge otrzyamc liste czarnych i białych klockow?
-    captures = get_captures(pawns, pawn)
+    max, captures = get_most_captures(pawns, pawn)
     if captures:
-        return captures
-    return get_forward_moves(pawns, pawn)
+        return True, max, captures
+    return False, 0, get_forward_moves(pawns, pawn)
 
 
 def available_capture_positions(pawn):
@@ -153,6 +280,7 @@ def get_captures(pawns, pawn, previous_capture: list = []):
             # pawn_position = pawn.position
             # move_pawn(calc)
             next_captures = get_captures(uncaptured_pawns, pawn, prev.copy())
+            uncaptured_pawns[captured_enemies_index[k]].is_captured = False
             # print("next captures",next_captures.copy())
             if len(next_captures) > 0:
                 fields.append(next_captures.copy())
@@ -195,22 +323,33 @@ def get_color_pawns(color, pawns):
     return list(filter(lambda pawn: pawn.color == color, pawns))
 
 
-def get_forward_moves(pawn, pawns):
-    positions = []
+def get_forward_moves(pawns, pawn):
     fields = []
-    if pawn.color == "black":
-        positions.append([-1, -1])
-        positions.append([1, -1])
+    if pawn.is_queen:
+        positions = [[1, 1],[1, -1], [-1, -1], [-1, 1]]
+    elif pawn.color == "black":
+        positions = [[1, 1],[1, -1]]
     else:
-        positions.append([1, 1])
-        positions.append([-1, 1])
+        positions = [[-1, 1],[-1, -1]]
     for position in positions:
-        calculated_position = sum_positions(zip(position, pawn.position))
-        if not is_on_board(calculated_position):
-            continue
-        if get_pawn(pawns, calculated_position):
-            continue
-        fields.append(calculated_position)
+        calculated_position = pawn.position
+        calculated_position = sum_positions(zip(position, calculated_position))
+        if (pawn.is_queen):
+            while True:
+                if not is_on_board(calculated_position):
+                    break
+                _, other_pawn = get_pawn(pawns, calculated_position)
+                if other_pawn:
+                    break
+                fields.append(calculated_position)
+                calculated_position = sum_positions(zip(position, calculated_position))
+        else:
+            if not is_on_board(calculated_position):
+                continue
+            _, other_pawn = get_pawn(pawns, calculated_position)
+            if other_pawn:
+                continue
+            fields.append(calculated_position)
 
     return fields
 
