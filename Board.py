@@ -370,7 +370,7 @@ def get_queen_moves(pawn, pawns):
             calculated_position = sum_positions(zip(position, pawn.position))
             if not is_on_board:
                 break
-            other_pawn = get_pawn(pawns, calculatedPosition)
+            other_pawn = get_pawn(pawns, calculated_position)
             if not other_pawn:
                 fields.append(calculated_position)
             else:
@@ -386,7 +386,7 @@ def get_queen_captures(pawn, pawns, positions):
             calculated_position = sum_positions(zip(position, pawn.position))
             if not is_on_board:
                 break
-            other_pawn = get_pawn(pawns, calculatedPosition)
+            other_pawn = get_pawn(pawns, calculated_position)
             if other_pawn:
                 if other_pawn.color != pawn.color:
                     calculated_position = sum_positions(zip(position, pawn.position))
