@@ -6,19 +6,19 @@ from tkinter.messagebox import NO
 from Pawn import Pawn
 import copy
 
-BOARD_WIDTH: int = 8
-BOARD_HEIGHT: int = 8
+BOARD_WIDTH: int = 10
+BOARD_HEIGHT: int = 10
 
 
-def initialize_board():
+def initialize_board(rows_of_pawns: int = 3):
     pawns: list = []
     for x in range(BOARD_WIDTH):
         for y in range(BOARD_HEIGHT):
             if (x + y) % 2 == 1:
-                if y < 3:
+                if y < rows_of_pawns:
                     pawn: Pawn = Pawn("black", [y, x])
                     pawns.append(pawn)
-                if y > 4:
+                if y > BOARD_HEIGHT - rows_of_pawns - 1:
                     pawn: Pawn = Pawn("white", [y, x])
                     pawns.append(pawn)
     return pawns
@@ -95,7 +95,7 @@ def build_board_from_move(board, move_is_capture, moves):
 def promotion(pawn):
     if pawn.color == "white" and pawn.position[0] == 0:
         pawn.is_queen = True
-    if pawn.color == "black" and pawn.position[0] == 7:
+    if pawn.color == "black" and pawn.position[0] == BOARD_HEIGHT - 1:
         pawn.is_queen = True
 
 
@@ -150,7 +150,12 @@ def print_board(pawns) -> None:
     white_square_code = "▒▒▒║"
     # x  = '\u26c0 \u26c1 \u26c2 \u26c3'
     # ┼ ─ │
-    print("  │ 0 ║ 1 ║ 2 ║ 3 ║ 4 ║ 5 ║ 6 ║ 7 │ ")
+    title = "  │"
+    row_split = "══" + "╬═══" * (BOARD_WIDTH + 1)
+    for k in range(BOARD_WIDTH):
+        title += f" {k} ║"
+    print(title)
+    print(row_split)
     for x in range(BOARD_WIDTH):
         row: str = str(x) + " │"
         for y in range(BOARD_HEIGHT):
@@ -162,9 +167,10 @@ def print_board(pawns) -> None:
                 row += ""
         row += str(x)
         print(row)
-        print("══╬═══╬═══╬═══╬═══╬═══╬═══╬═══╬═══╬═══")
+        print(row_split)
+        # print("══╬═══╬═══╬═══╬═══╬═══╬═══╬═══╬═══╬═══")
     # print("  0 1 2 3 4 5 6 7 ")
-    print("  │ 0 ║ 1 ║ 2 ║ 3 ║ 4 ║ 5 ║ 6 ║ 7 │ ")
+    print(title)
     # print("  │0│ │1│ │2│ │3│ │4│ │5│ │6│ │7│ ")
 
 
@@ -414,4 +420,9 @@ def sub_positions(zipped_positions):
 
 
 def is_on_board(position) -> bool:
-    return position[0] >= 0 and position[0] <= 7 and position[1] >= 0 and position[1] <= 7
+    return (
+        position[0] >= 0
+        and position[0] <= BOARD_WIDTH - 1
+        and position[1] >= 0
+        and position[1] <= BOARD_WIDTH - 1
+    )
