@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from GameTree import GameTree
+from game_parser import get_game
 
 # import keyboard
 from time import sleep
@@ -19,19 +20,17 @@ import os
 g: GameTree = None
 
 sim2 = simulation(
-    [Pawn("black", [5, 2]), Pawn("white", [6, 3]), Pawn("black", [5, 4]), Pawn("black", [3, 2]), Pawn("black", [3, 4])]
+    [
+        Pawn("black", [5, 2]),
+        Pawn("white", [6, 3]),
+        Pawn("black", [5, 4]),
+        Pawn("black", [3, 2]),
+        Pawn("black", [3, 4]),
+    ]
 )
-sim7 = simulation(
-    [Pawn("black", [6, 7]), Pawn("white", [7, 6])]
-)
+sim7 = simulation([Pawn("black", [6, 7]), Pawn("white", [7, 6])])
 queen = Pawn("white", [5, 2])
 queen.is_queen = True
-
-def wait():
-    try:
-        os.system("pause")  # windows, doesn't require enter
-    except:
-        os.system('read -p ""')  # linux
 
 
 def clearConsole():
@@ -39,16 +38,21 @@ def clearConsole():
     os.system(cmd)
 
 
-def start_game(beginning_layout=None, player='white'):
+def start_game(beginning_layout=None, player="white"):
     global g
-    g = GameTree(beginning_layout,player=player)
+    white_eval = [1, 5, 0.7, 0.2, 1, 0.5, 0.5, 0.5, 0.2, 0.2]
+    black_eval = [1, 5, 0.7, 0.2, 1, 0.5, 0.5, 0.5, 0.2, 0.2]
+    white_depth = 5
+    black_depth = 3
+    g = GameTree(
+        begining_layout=beginning_layout,
+        player=player,
+        white_depth=white_depth,
+        black_depth=black_depth,
+        white_eval=white_eval,
+        black_eval=black_eval,
+    )
     g.build_tree_game()
-
-    # print(g.root)
-    # g.choose_move(0)
-    # g.choose_move(0)
-    # g.build_tree_game()
-
 
 def startup_menu():
     global g
@@ -57,7 +61,6 @@ def startup_menu():
         print("Wybierz, co chcesz wyświetlić:")
         print("1 - Man vs Man")  # Pokazuje stan wszystkich stanowisk (dostępne/zajete itp...)
         print("2 - Man vs AI")  # Pokazuje dokladniejszy stan jednego stanowiska
-        # (jak dlugo jest cos przygotowywane/ ile osob itp..)
         print("3 - AI vs AI")  # Pokazuje jak bardzo oblozone sa stanowiska
         print("4 - Wyjdz z menu")
         try:
@@ -67,36 +70,32 @@ def startup_menu():
         if choice < 1 or choice > 4:
             print("Podano złą wartość, spróbuj ponownie")
         if choice == 1:
-            start_game(sim7+[queen])
+            start_game(sim7 + [queen])
+            color, game = get_game(0)
+            start_game(game,player=color)
             while True:
                 clearConsole()
                 g.show()
-                if (g.game_status):
-                    print('Game result: ' + g.game_status)
+                if g.show_game_status():
                     break
                 print(f"Choose move: {0}-{len(g.root.avaialbe_moves)-1}")
                 stand = int(input())
                 if stand >= 0 and stand < len(g.root.avaialbe_moves):
                     g.choose_move(stand)
                     pass
-                    ##TODO winnig status
                 if stand == 100:
                     break
-                # print("dupa")
-                # print("Wcisnij dowolny klawisz aby cofnąć do menu")
-                # wait()
                 clearConsole()
             break
         elif choice == 2:
-            print(f'Man\'s color; w -white b - black')
+            print(f"Man's color; w - white b - black")
             color = "white" if str(input()) == "w" else "black"
-            print (f'Choosed {color}')
-            start_game(sim7+[queen],color)
+            print(f"Choosed {color}")
+            start_game(sim7 + [queen], color)
             while True:
                 clearConsole()
                 g.show()
-                if (g.game_status):
-                    print('Game result: ' + g.game_status)
+                if g.show_game_status():
                     break
                 if g.root.color == color:
                     print(f"Choose move: {0}-{len(g.root.avaialbe_moves)-1}")
@@ -104,58 +103,32 @@ def startup_menu():
                     if stand >= 0 and stand < len(g.root.avaialbe_moves):
                         g.choose_move(stand)
                         pass
-                        ##TODO winnig status
-                
+
                     if stand == 100:
                         break
                 else:
                     i = g.choose_ai_move()
                     g.choose_move(i)
-                # print("dupa")
-                # print("Wcisnij dowolny klawisz aby cofnąć do menu")
-                # wait()
                 clearConsole()
             break
         elif choice == 3:
-            clearConsole()
-            print("Wcisnij dowolny klawisz aby cofnąć do menu")
-            wait()
-            clearConsole()
-
-
-def coloured_square(hex_string):
-    """
-    Returns a coloured square that you can print to a terminal.
-    """
-    hex_string = hex_string.strip("#")
-    assert len(hex_string) == 6
-    red = int(hex_string[:2], 16)
-    green = int(hex_string[2:4], 16)
-    blue = int(hex_string[4:6], 16)
-
-    return f"\033[48:2::{red}:{green}:{blue}m \033[49m"
-
+            # start_game(sim7+[queen])
+            start_game()
+            while True:
+                clearConsole()
+                g.show()
+                if g.show_game_status():
+                    break
+                i = g.choose_ai_move()
+                g.choose_move(i)
+                clearConsole()
+            break
 
 if __name__ == "__main__":
     print("Hello world!")
 
-
-    start_game(sim7+[queen])
+    start_game(sim7 + [queen])
     startup_menu()
-    # print(f"\u26c0 \u26c1 \u26c2 \u26c3")
-    # sim = simulation([Pawn('white', [6,1]), Pawn('black', [5,2]), Pawn('black', [3,4])])
-    # # print_board(sim)
-    # # get_available_captures(sim,sim[0])
-    # a = get_captures(sim,sim[0])
-    # print("a",a)
-    # sim1 = simulation([Pawn('white', [6,1]), Pawn('black', [5,2]), Pawn('black', [3,4]), Pawn('black', [1,6]), Pawn('black', [1,4]), Pawn('black', [1,2])])
-    # print_board(sim1)
-    # # get_available_captures(sim,sim[0])
-    # b = get_captures(sim1,sim1[0])
-    # for k in range(len(b)):
-    #     print("b",b[k])
-    # pass
-    # print("b",b[0])
     sim3 = simulation(
         [
             Pawn("black", [5, 2]),

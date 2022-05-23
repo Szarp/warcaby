@@ -1,6 +1,7 @@
 from logging import root
 
 from matplotlib.style import available
+from numpy import double,mean
 from Pawn import Pawn
 from Leaf import Leaf
 from typing import List
@@ -11,26 +12,48 @@ from evaluate import statistics
 
 class GameTree:
     def __init__(
-        self, begining_layout: List = None, alfabeta: bool = False, depth: int = 2,
-    player:str = "white") -> None:
+        self,
+        begining_layout: List = None,
+        alfabeta: bool = False,
+        white_depth: int = 2,
+        black_depth: int = 2,
+        player: str = "white",
+        white_eval: list = [1, 5, 0.7, 0.2, 1, 0.5, 0.5, 0.5, 0.2, 0.2],
+        black_eval: list = [1, 5, 0.7, 0.2, 1, 0.5, 0.5, 0.5, 0.2, 0.2],
+    ) -> None:
         if begining_layout != None:
             self.board = begining_layout  # init_board_from_layout(begining_layout)
         else:
             self.board: List[Pawn] = initialize_board()
         self.player: str = player
-        self.depth: int = depth
+        # self.depth: int = depth
+        self.white_depth: int = white_depth
+        self.black_depth: int = black_depth
+        self.white_eval: list = white_eval
+        self.black_eval: list = black_eval
         self.moves_without_capture: int = 0
-        self.root: Leaf = Leaf(board=self.board,color=self.player,moves_without_capture=self.moves_without_capture)
+        self.root: Leaf = Leaf(
+            board=self.board, color=self.player, moves_without_capture=self.moves_without_capture
+        )
         self.game_status: str = game_status(self.board, self.player, self.moves_without_capture)
+        self.all_moves:list=[]
+        self.black_move_time:list=[]
+        self.white_move_time:list=[]
 
-    def build_tree_game(self):
+    def build_tree_game(self)->double:
         start = time.time()
-        build_tree_game(self.root, self.depth)
+        if self.root.color == "white":
+            build_tree_game(self.root, self.white_depth)
+        else:
+            build_tree_game(self.root, self.black_depth)
         end = time.time()
-        print(f"building model time: {end - start}")
+        return end - start
+        # print(f"building model time: {end - start}")
+
     def choose_ai_move(self):
         elems = [leaf.evaluation for leaf in self.root.leafs]
         return elems.index(self.root.evaluation)
+
     def choose_move(self, move: int):
         if move in range(len(self.root.avaialbe_moves)):
             temp: Leaf = self.root.leafs.pop(move)
@@ -38,10 +61,15 @@ class GameTree:
             self.root = temp
             self.root.root = None
             self.board = self.root.board
-            self.build_tree_game()
+            t:double = self.build_tree_game()
+            self.all_moves.append(move)
+            if self.root.color == "white":
+                self.white_move_time.append(t)
+            else:
+                self.black_move_time.append(t)
             # self.game_status = game_status(self.board)
             self.game_status = self.root.game_status
-            self.moves_without_capture  = self.root.moves_without_capture
+            self.moves_without_capture = self.root.moves_without_capture
         else:
             print("Wrong move")
         pass
@@ -51,7 +79,9 @@ class GameTree:
         self.game_status = self.root.game_status
         # self.game_status = self.root.game_status
         for i, move in enumerate(available_moves):
-            print(f"{i}. begin:{move[0].position} end:{move[1]} eval:{self.root.leafs[i].evaluation if self.root.leafs != [] else None }")
+            print(
+                f"{i}. begin:{move[0].position} end:{move[1]} eval:{self.root.leafs[i].evaluation if self.root.leafs != [] else None }"
+            )
             # [[k[0].position,k[1][0]] for k in self.avaialbe_moves]
         pass
 
@@ -62,18 +92,27 @@ class GameTree:
 
     def show_game_status(self):
         if self.game_status:
-            print('Game result: ' + self.game_status)
+            print("Game result: " + self.game_status)
+            print(f'Game moves: {len(self.all_moves)}')
+            print(f'Avarege black time: {mean(self.black_move_time)}')
+            print(f'Avarege white time: {mean(self.white_move_time)}')
+            return True
+        return False
+
+
 def build_tree_game(root_node: Leaf = None, max_depth: int = 0):
     # pass
     if root_node.game_status != None:
-        s:statistics = statistics(root_node.board,root_node.game_status)
+        wages = root_node.white_eval if root_node.color == "white" else root_node.black_eval
+        s: statistics = statistics(root_node.board, root_node.game_status, wages=wages)
         s.iterate_board()
         root_node.evaluation = s.board_evaluation()
         return
     if root_node.count_parents() == max_depth:
-        #TODO propagete evaluation
-        #TODO implement alfabeta
-        s:statistics = statistics(root_node.board,root_node.game_status)
+        # TODO propagete evaluation
+        # TODO implement alfabeta
+        wages = root_node.white_eval if root_node.color == "white" else root_node.black_eval
+        s: statistics = statistics(root_node.board, root_node.game_status, wages=wages)
         s.iterate_board()
         root_node.evaluation = s.board_evaluation()
         return

@@ -2,16 +2,6 @@ from Pawn import Pawn
 from typing import List
 from InitializeBoard import get_color_pawns
 from Board import build_board_from_move, get_all_possible_moves, game_status
-from evaluate import statistics
-
-
-def basic_evaluation(board):
-    return (
-        len(get_color_pawns("black", board))
-        - len(get_color_pawns("white", board))
-        # + 5 * (len(board.black_king) - len(board.white_king))
-    )
-
 
 class Leaf:
     def __init__(
@@ -21,6 +11,8 @@ class Leaf:
         move: list = None,
         moves_without_capture: int = 0,
         color: str = "white",
+        white_eval:list = [1, 5, 0.7, 0.2, 1, 0.5, 0.5, 0.5, 0.2, 0.2],
+        black_eval:list = [1, 5, 0.7, 0.2, 1, 0.5, 0.5, 0.5, 0.2, 0.2]
     ) -> None:
         self.move = move
         self.color = color
@@ -35,10 +27,9 @@ class Leaf:
         self.leafs: List[Leaf] = []
         self.root: Leaf = None
         self.game_status = game_status(self.board,self.color,queen_moves=self.moves_without_capture)
-        # s:statistics = statistics(self.board,self.game_status)
-        # s.iterate_board()
-        # self.evaluation: int = s.board_evaluation()
         self.evaluation:int = None
+        self.black_eval:list = black_eval
+        self.white_eval:list = white_eval
 
     def count_parents(self, i=0):
         if self.root == None:
@@ -56,4 +47,3 @@ class Leaf:
         for k in self.leafs:
             ret += k.__str__()
         return ret
-        # return f'Node'
