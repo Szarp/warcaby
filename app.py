@@ -1,5 +1,7 @@
 from asyncio import base_events
+from logging import root
 import re
+from tkinter import E
 from tkinter.messagebox import NO
 from typing import List
 from Pawn import Pawn
@@ -16,6 +18,14 @@ import os
 
 g: GameTree = None
 
+sim2 = simulation(
+    [Pawn("black", [5, 2]), Pawn("white", [6, 3]), Pawn("black", [5, 4]), Pawn("black", [3, 2]), Pawn("black", [3, 4])]
+)
+sim7 = simulation(
+    [Pawn("black", [6, 7]), Pawn("white", [7, 6])]
+)
+queen = Pawn("white", [5, 2])
+queen.is_queen = True
 
 def wait():
     try:
@@ -29,9 +39,9 @@ def clearConsole():
     os.system(cmd)
 
 
-def start_game():
+def start_game(beginning_layout=None, player='white'):
     global g
-    g = GameTree()
+    g = GameTree(beginning_layout,player=player)
     g.build_tree_game()
 
     # print(g.root)
@@ -57,33 +67,55 @@ def startup_menu():
         if choice < 1 or choice > 4:
             print("Podano złą wartość, spróbuj ponownie")
         if choice == 1:
+            start_game(sim7+[queen])
             while True:
                 clearConsole()
                 g.show()
-                print(f"Choose move: {0}-{len(g.root.avaialbe_moves)}")
+                if (g.game_status):
+                    print('Game result: ' + g.game_status)
+                    break
+                print(f"Choose move: {0}-{len(g.root.avaialbe_moves)-1}")
                 stand = int(input())
                 if stand >= 0 and stand < len(g.root.avaialbe_moves):
                     g.choose_move(stand)
-
+                    pass
+                    ##TODO winnig status
                 if stand == 100:
                     break
                 # print("dupa")
                 # print("Wcisnij dowolny klawisz aby cofnąć do menu")
                 # wait()
                 clearConsole()
+            break
         elif choice == 2:
-            print("TODO")
-            stand = int(input())
-            if stand < 1 or stand > 5:
-                print("TODOa")
-                sleep(3)
+            print(f'Man\'s color; w -white b - black')
+            color = "white" if str(input()) == "w" else "black"
+            print (f'Choosed {color}')
+            start_game(sim7+[queen],color)
+            while True:
                 clearConsole()
-            else:
+                g.show()
+                if (g.game_status):
+                    print('Game result: ' + g.game_status)
+                    break
+                if g.root.color == color:
+                    print(f"Choose move: {0}-{len(g.root.avaialbe_moves)-1}")
+                    stand = int(input())
+                    if stand >= 0 and stand < len(g.root.avaialbe_moves):
+                        g.choose_move(stand)
+                        pass
+                        ##TODO winnig status
+                
+                    if stand == 100:
+                        break
+                else:
+                    i = g.choose_ai_move()
+                    g.choose_move(i)
+                # print("dupa")
+                # print("Wcisnij dowolny klawisz aby cofnąć do menu")
+                # wait()
                 clearConsole()
-                # print_single_stand(stanowiska, stand)
-                print("Wcisnij dowolny klawisz aby cofnąć do menu")
-                wait()
-                clearConsole()
+            break
         elif choice == 3:
             clearConsole()
             print("Wcisnij dowolny klawisz aby cofnąć do menu")
@@ -107,9 +139,9 @@ def coloured_square(hex_string):
 if __name__ == "__main__":
     print("Hello world!")
 
-    start_game()
-    startup_menu()
 
+    start_game(sim7+[queen])
+    startup_menu()
     # print(f"\u26c0 \u26c1 \u26c2 \u26c3")
     # sim = simulation([Pawn('white', [6,1]), Pawn('black', [5,2]), Pawn('black', [3,4])])
     # # print_board(sim)
@@ -124,9 +156,6 @@ if __name__ == "__main__":
     #     print("b",b[k])
     # pass
     # print("b",b[0])
-    sim2 = simulation(
-        [Pawn("black", [5, 2]), Pawn("black", [5, 4]), Pawn("black", [3, 2]), Pawn("black", [3, 4])]
-    )
     sim3 = simulation(
         [
             Pawn("black", [5, 2]),
@@ -148,15 +177,13 @@ if __name__ == "__main__":
         ]
     )
     # get_available_captures(sim,sim[0])
-    queen = Pawn("white", [5, 2])
-    queen.is_queen = True
-    print_board(sim5 + [queen])
+    # print_board(sim5 + [queen])
     # temp = [[2, 5], [4, 7]]
     # temp.extend([[2, 5], [0, 3]])
     # print(temp)
     # _, c = get_available_captures(sim4,queen)
     # print(c)
-    print(get_all_possible_moves("white", sim5 + [queen]))
+    # print(get_all_possible_moves("white", sim5 + [queen]))
     # print(get_pawn_between(sim6, [7,2], [2,7]).print())
     # print(sim4+[queen])
     # print(get_pawn_moves(sim4, sim4[0]))

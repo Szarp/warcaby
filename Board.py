@@ -6,9 +6,11 @@ from tkinter.messagebox import NO
 from Pawn import Pawn
 import copy
 
-BOARD_WIDTH: int = 10
-BOARD_HEIGHT: int = 10
-
+BOARD_WIDTH: int = 8
+BOARD_HEIGHT: int = 8
+WHITES_WIN_MESSAGE: str = 'Whites win'
+BLACKS_WIN_MESSAGE: str = 'Blacks win'
+DRAW_MESSAGE: str = 'Draw'
 
 def initialize_board(rows_of_pawns: int = 3):
     pawns: list = []
@@ -108,38 +110,40 @@ def perform_move(pawn, position):
     move_pawn(pawn, position)
 
 
-def game_status(pawns, queen_moves=0):
+def game_status(pawns, color, queen_moves=0):
     blacks = get_color_pawns("black", pawns)
     whites = get_color_pawns("white", pawns)
     can_white_move = False
     can_black_move = False
-
     if not blacks:
-        return "white"
+        return WHITES_WIN_MESSAGE
     if not whites:
-        return "black"
+        return BLACKS_WIN_MESSAGE
 
     for pawn in blacks:
-        if get_pawn_moves(pawns, pawn):
+        _, _, moves = get_pawn_moves(pawns, pawn)
+        if moves:
             can_black_move = True
             break
 
     for pawn in whites:
-        if get_pawn_moves(pawns, pawn):
+        _, _, moves = get_pawn_moves(pawns, pawn)
+        if moves:
             can_white_move = True
             break
 
-    if can_black_move and not can_white_move:
-        return "black"
-
-    if not can_black_move and can_white_move:
-        return "white"
-
     if not can_black_move and not can_white_move:
-        return "draw"
+        return DRAW_MESSAGE
+    
+    if color == 'white':
+        if not can_white_move:
+            return BLACKS_WIN_MESSAGE
 
-    if queen_moves >= 15:
-        return "draw"
+    if color == 'black':
+        if not can_black_move:
+            return WHITES_WIN_MESSAGE
+    if queen_moves > 15:
+        return DRAW_MESSAGE
 
     return
 
