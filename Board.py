@@ -8,9 +8,10 @@ import copy
 
 BOARD_WIDTH: int = 8
 BOARD_HEIGHT: int = 8
-WHITES_WIN_MESSAGE: str = 'Whites win'
-BLACKS_WIN_MESSAGE: str = 'Blacks win'
-DRAW_MESSAGE: str = 'Draw'
+WHITES_WIN_MESSAGE: str = "Whites win"
+BLACKS_WIN_MESSAGE: str = "Blacks win"
+DRAW_MESSAGE: str = "Draw"
+
 
 def initialize_board(rows_of_pawns: int = 3):
     pawns: list = []
@@ -134,12 +135,12 @@ def game_status(pawns, color, queen_moves=0):
 
     if not can_black_move and not can_white_move:
         return DRAW_MESSAGE
-    
-    if color == 'white':
+
+    if color == "white":
         if not can_white_move:
             return BLACKS_WIN_MESSAGE
 
-    if color == 'black':
+    if color == "black":
         if not can_black_move:
             return WHITES_WIN_MESSAGE
     if queen_moves > 15:
@@ -148,12 +149,8 @@ def game_status(pawns, color, queen_moves=0):
     return
 
 
-# LUUKIER SYNKTAKTYCZNY ;)
 def print_board(pawns) -> None:
-    # white_square_code = f" \u25A1 ║"
     white_square_code = "▒▒▒║"
-    # x  = '\u26c0 \u26c1 \u26c2 \u26c3'
-    # ┼ ─ │
     title = "  │"
     row_split = "══" + "╬═══" * (BOARD_WIDTH + 1)
     for k in range(BOARD_WIDTH):
@@ -172,20 +169,10 @@ def print_board(pawns) -> None:
         row += str(x)
         print(row)
         print(row_split)
-        # print("══╬═══╬═══╬═══╬═══╬═══╬═══╬═══╬═══╬═══")
-    # print("  0 1 2 3 4 5 6 7 ")
     print(title)
-    # print("  │0│ │1│ │2│ │3│ │4│ │5│ │6│ │7│ ")
-
-
-# 0 │□│ │b│ │□│ │b│ │□│ │b│ │□│ │b│ 0
-# ──┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼
-#  │0║1║2║3║4║5║6║7│
-# 0│□║b║□║b║□║b║□║b║0
 
 
 def get_pawn(pawns, position) -> Pawn:
-    # pawn = list(filter(lambda pawn: pawn.position == position, pawns))
     for i, pawn in enumerate(pawns):
         if pawn.position == position:
             return (i, pawn)
@@ -197,8 +184,6 @@ def is_free(pawns, position):
         if pawn.position == position:
             return False
     return True
-
-    # return None if not pawn else pawn[0]
 
 
 def move_pawn(pawn, position) -> None:
@@ -234,7 +219,6 @@ def flatten(moves):
 
 
 def get_pawn_moves(pawns, pawn):
-    # jak moge otrzyamc liste czarnych i białych klockow?
     max, captures = get_most_captures(pawns, pawn)
     if captures:
         return True, max, captures
@@ -300,10 +284,8 @@ def get_available_captures(pawns, pawn):
 def get_captures(pawns, pawn, previous_capture: list = []):
     pawn = copy.deepcopy(pawn)
     captured_enemies_index, available_capture_moves = get_available_captures(pawns, pawn)
-    # print("here",len(available_capture_moves),previous_capture)
     next_captures = []
     fields = []
-    # print("moves",available_capture_moves,"prev",previous_capture)
     if len(available_capture_moves) > 0:
         for k in range(len(available_capture_moves)):
             uncaptured_pawns = pawns.copy()
@@ -311,28 +293,12 @@ def get_captures(pawns, pawn, previous_capture: list = []):
             move_pawn(pawn, available_capture_moves[k])  # [[0,0]]
             prev = previous_capture.copy()
             prev.append(available_capture_moves[k])
-            # print("moves2",prev)
-            # print("prev",prev.copy(), "uncaptured",len(uncaptured_pawns))
-            # pawn_position = pawn.position
-            # move_pawn(calc)
             next_captures = get_captures(uncaptured_pawns, pawn, prev.copy())
             uncaptured_pawns[captured_enemies_index[k]].is_captured = False
-            # print("next captures",next_captures.copy())
             if len(next_captures) > 0:
                 fields.append(next_captures.copy())
-                # return next_captures.copy()
-                # for next_capture in next_captures: # [[0,1],[0,2]]
-                # 	fields.append(previous_capture) # [[[0,0],[0,1]],[[0,0],[0,2]]]
-            # else:
         return fields
-        # print(fields)
-        # return fields.copy()
-    # if len(next_captures) == 0:
-    # print(previous_capture)
     return previous_capture
-    # else:
-    # 	pass
-    # 	return fields
 
 
 def get_color_pawns(color, pawns):

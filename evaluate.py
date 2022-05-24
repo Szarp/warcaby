@@ -8,7 +8,9 @@ from Pawn import Pawn
 
 
 class statistics:
-    def __init__(self, board, game_status, wages=[1, 5, 0.7, 0.2, 1, 0.5, 0.5, 0.5, 0.2, 0.2]) -> None:
+    def __init__(
+        self, board, game_status, wages=[1, 5, 0.7, 0.2, 1, 0.5, 0.5, 0.5, 0.2, 0.2]
+    ) -> None:
         self.board = board
         self.pawns = 0  # ok 0.
         self.queens = 0  # ok 1.
@@ -61,11 +63,11 @@ class statistics:
                 self.free_space_on_promotion += 1
 
     def board_evaluation(self):
-        if self.game_status == 'Whites win':
+        if self.game_status == "Whites win":
             return 100
-        elif self.game_status == 'Blacks win':
+        elif self.game_status == "Blacks win":
             return -100
-        elif self.game_status == 'Draw':
+        elif self.game_status == "Draw":
             return 0
         else:
             return (

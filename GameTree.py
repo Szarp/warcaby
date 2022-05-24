@@ -1,7 +1,4 @@
-from logging import root
-
-from matplotlib.style import available
-from numpy import double,mean
+from numpy import double, mean
 from Pawn import Pawn
 from Leaf import Leaf
 from typing import List
@@ -26,7 +23,6 @@ class GameTree:
         else:
             self.board: List[Pawn] = initialize_board()
         self.player: str = player
-        # self.depth: int = depth
         self.white_depth: int = white_depth
         self.black_depth: int = black_depth
         self.white_eval: list = white_eval
@@ -34,15 +30,17 @@ class GameTree:
         self.moves_without_capture: int = 0
         self.alfabeta = alfabeta
         self.root: Leaf = Leaf(
-            board=self.board, color=self.player, moves_without_capture=self.moves_without_capture,alfabeta=self.alfabeta
+            board=self.board,
+            color=self.player,
+            moves_without_capture=self.moves_without_capture,
+            alfabeta=self.alfabeta,
         )
         self.game_status: str = game_status(self.board, self.player, self.moves_without_capture)
-        self.all_moves:list=[]
-        self.black_move_time:list=[]
-        self.white_move_time:list=[]
-       
+        self.all_moves: list = []
+        self.black_move_time: list = []
+        self.white_move_time: list = []
 
-    def build_tree_game(self)->double:
+    def build_tree_game(self) -> double:
         start = time.time()
         if self.root.color == "white":
             build_tree_game(self.root, self.white_depth)
@@ -50,7 +48,6 @@ class GameTree:
             build_tree_game(self.root, self.black_depth)
         end = time.time()
         return end - start
-        # print(f"building model time: {end - start}")
 
     def choose_ai_move(self):
         elems = [leaf.evaluation for leaf in self.root.leafs]
@@ -59,17 +56,15 @@ class GameTree:
     def choose_move(self, move: int):
         if move in range(len(self.root.avaialbe_moves)):
             temp: Leaf = self.root.leafs.pop(move)
-            # del self.root
             self.root = temp
             self.root.root = None
             self.board = self.root.board
-            t:double = self.build_tree_game()
+            t: double = self.build_tree_game()
             self.all_moves.append(move)
             if self.root.color == "white":
                 self.white_move_time.append(t)
             else:
                 self.black_move_time.append(t)
-            # self.game_status = game_status(self.board)
             self.game_status = self.root.game_status
             self.moves_without_capture = self.root.moves_without_capture
         else:
@@ -79,13 +74,11 @@ class GameTree:
     def show_moves(self):
         available_moves = self.root.avaialbe_moves
         self.game_status = self.root.game_status
-        # self.game_status = self.root.game_status
         for i, move in enumerate(available_moves):
             # print(
             #     f"{i}. begin:{move[0].position} end:{move[1]} eval:{self.root.leafs[i].evaluation if self.root.leafs != [] else None }"
             # )
             print(f"{i}. begin:{move[0].position} end:{move[1]}")
-            # [[k[0].position,k[1][0]] for k in self.avaialbe_moves]
         pass
 
     def show(self):
@@ -95,18 +88,19 @@ class GameTree:
 
     def show_game_status(self):
         if self.game_status:
-            # print("Game result: " + self.game_status)
-            # print(f'Game moves: {len(self.all_moves)}')
-            # print(f'Avarege black time: {mean(self.black_move_time)}')
-            # print(f'Avarege white time: {mean(self.white_move_time)}')
-            return True,[self.game_status,len(self.all_moves),mean(self.black_move_time),mean(self.white_move_time)]
-        return False,[]
+            return True, [
+                self.game_status,
+                len(self.all_moves),
+                mean(self.black_move_time),
+                mean(self.white_move_time),
+            ]
+        return False, []
+
     def white_wins(self):
         return self.game_status == "Whites win"
 
 
 def build_tree_game(root_node: Leaf = None, max_depth: int = 0):
-    # pass
     if root_node.game_status != None:
         wages = root_node.white_eval if root_node.color == "white" else root_node.black_eval
         s: statistics = statistics(root_node.board, root_node.game_status, wages=wages)
@@ -114,8 +108,6 @@ def build_tree_game(root_node: Leaf = None, max_depth: int = 0):
         root_node.evaluation = s.board_evaluation()
         return
     if root_node.count_parents() == max_depth:
-        # TODO propagete evaluation
-        # TODO implement alfabeta
         wages = root_node.white_eval if root_node.color == "white" else root_node.black_eval
         s: statistics = statistics(root_node.board, root_node.game_status, wages=wages)
         s.iterate_board()
@@ -130,7 +122,7 @@ def build_tree_game(root_node: Leaf = None, max_depth: int = 0):
                     move=k,
                     moves_without_capture=root_node.moves_without_capture,
                     color=root_node.other_color(),
-                    alfabeta=root_node.alfabeta
+                    alfabeta=root_node.alfabeta,
                 )
                 l.root = root_node
                 root_node.leafs.append(l)
@@ -139,19 +131,12 @@ def build_tree_game(root_node: Leaf = None, max_depth: int = 0):
                     e = [leaf.evaluation for leaf in root_node.leafs]
                     root_node.evaluation = max(e) if root_node.color == "white" else min(e)
                     if root_node.root:
-                        # print(len(root_node.leafs),root_node.root.__hash__)
                         if root_node.root.evaluation:
-                            cut =  root_node.root.evaluation > root_node.evaluation
+                            cut = root_node.root.evaluation > root_node.evaluation
                             if cut and root_node.root.color == "black":
-                                pass
-                                # print("was here")
                                 break
                             if not cut and root_node.root.color == "white":
-                                pass
-                                # print("was here")
                                 break
-                    # print(root_node.root.evaluation)
-                # build_tree_game(l, max_depth=max_depth)
         else:
             for l in root_node.leafs:
                 build_tree_game(l, max_depth=max_depth)

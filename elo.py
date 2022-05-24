@@ -38,10 +38,12 @@ class Elo:
                 name, depth, params = player
                 params = [int(p) / 10 for p in params.split(",")]
                 self.addPlayer(name=name, depth=depth, params=params)
-    def get_random_player(self,name:str=""):
+
+    def get_random_player(self, name: str = ""):
         if name == "":
             name = random.choice(list(self.ratingDict.keys()))
-        return (name,self.ratingDict[name])
+        return (name, self.ratingDict[name])
+
     def get_best_players(self, limit: int = 50):
         return heapq.nlargest(limit, self.ratingDict.items(), key=lambda i: i[0])
         pass

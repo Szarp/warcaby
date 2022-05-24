@@ -1,7 +1,7 @@
 from Pawn import Pawn
 from typing import List
-from InitializeBoard import get_color_pawns
 from Board import build_board_from_move, get_all_possible_moves, game_status
+
 
 class Leaf:
     def __init__(
@@ -11,9 +11,9 @@ class Leaf:
         move: list = None,
         moves_without_capture: int = 0,
         color: str = "white",
-        white_eval:list = [1, 5, 0.7, 0.2, 1, 0.5, 0.5, 0.5, 0.2, 0.2],
-        black_eval:list = [1, 5, 0.7, 0.2, 1, 0.5, 0.5, 0.5, 0.2, 0.2],
-        alfabeta:bool=False
+        white_eval: list = [1, 5, 0.7, 0.2, 1, 0.5, 0.5, 0.5, 0.2, 0.2],
+        black_eval: list = [1, 5, 0.7, 0.2, 1, 0.5, 0.5, 0.5, 0.2, 0.2],
+        alfabeta: bool = False,
     ) -> None:
         self.move = move
         self.color = color
@@ -27,11 +27,13 @@ class Leaf:
         self.moves_without_capture: int = 0 if was_capture_move else moves_without_capture + 1
         self.leafs: List[Leaf] = []
         self.root: Leaf = None
-        self.game_status = game_status(self.board,self.color,queen_moves=self.moves_without_capture)
-        self.evaluation:int = None
-        self.black_eval:list = black_eval
-        self.white_eval:list = white_eval
-        self.alfabeta=alfabeta
+        self.game_status = game_status(
+            self.board, self.color, queen_moves=self.moves_without_capture
+        )
+        self.evaluation: int = None
+        self.black_eval: list = black_eval
+        self.white_eval: list = white_eval
+        self.alfabeta = alfabeta
 
     def count_parents(self, i=0):
         if self.root == None:
@@ -49,8 +51,9 @@ class Leaf:
         for k in self.leafs:
             ret += k.__str__()
         return ret
+
     def count_leafs(self):
-        i =1
+        i = 1
         for k in self.leafs:
-            i+= k.count_leafs()
+            i += k.count_leafs()
         return i
