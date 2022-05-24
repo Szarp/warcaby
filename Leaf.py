@@ -12,7 +12,8 @@ class Leaf:
         moves_without_capture: int = 0,
         color: str = "white",
         white_eval:list = [1, 5, 0.7, 0.2, 1, 0.5, 0.5, 0.5, 0.2, 0.2],
-        black_eval:list = [1, 5, 0.7, 0.2, 1, 0.5, 0.5, 0.5, 0.2, 0.2]
+        black_eval:list = [1, 5, 0.7, 0.2, 1, 0.5, 0.5, 0.5, 0.2, 0.2],
+        alfabeta:bool=False
     ) -> None:
         self.move = move
         self.color = color
@@ -30,6 +31,7 @@ class Leaf:
         self.evaluation:int = None
         self.black_eval:list = black_eval
         self.white_eval:list = white_eval
+        self.alfabeta=alfabeta
 
     def count_parents(self, i=0):
         if self.root == None:
@@ -47,3 +49,8 @@ class Leaf:
         for k in self.leafs:
             ret += k.__str__()
         return ret
+    def count_leafs(self):
+        i =1
+        for k in self.leafs:
+            i+= k.count_leafs()
+        return i

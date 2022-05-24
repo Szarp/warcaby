@@ -32,13 +32,15 @@ class GameTree:
         self.white_eval: list = white_eval
         self.black_eval: list = black_eval
         self.moves_without_capture: int = 0
+        self.alfabeta = alfabeta
         self.root: Leaf = Leaf(
-            board=self.board, color=self.player, moves_without_capture=self.moves_without_capture
+            board=self.board, color=self.player, moves_without_capture=self.moves_without_capture,alfabeta=self.alfabeta
         )
         self.game_status: str = game_status(self.board, self.player, self.moves_without_capture)
         self.all_moves:list=[]
         self.black_move_time:list=[]
         self.white_move_time:list=[]
+       
 
     def build_tree_game(self)->double:
         start = time.time()
@@ -79,9 +81,10 @@ class GameTree:
         self.game_status = self.root.game_status
         # self.game_status = self.root.game_status
         for i, move in enumerate(available_moves):
-            print(
-                f"{i}. begin:{move[0].position} end:{move[1]} eval:{self.root.leafs[i].evaluation if self.root.leafs != [] else None }"
-            )
+            # print(
+            #     f"{i}. begin:{move[0].position} end:{move[1]} eval:{self.root.leafs[i].evaluation if self.root.leafs != [] else None }"
+            # )
+            print(f"{i}. begin:{move[0].position} end:{move[1]}")
             # [[k[0].position,k[1][0]] for k in self.avaialbe_moves]
         pass
 
@@ -92,12 +95,14 @@ class GameTree:
 
     def show_game_status(self):
         if self.game_status:
-            print("Game result: " + self.game_status)
-            print(f'Game moves: {len(self.all_moves)}')
-            print(f'Avarege black time: {mean(self.black_move_time)}')
-            print(f'Avarege white time: {mean(self.white_move_time)}')
-            return True
-        return False
+            # print("Game result: " + self.game_status)
+            # print(f'Game moves: {len(self.all_moves)}')
+            # print(f'Avarege black time: {mean(self.black_move_time)}')
+            # print(f'Avarege white time: {mean(self.white_move_time)}')
+            return True,[self.game_status,len(self.all_moves),mean(self.black_move_time),mean(self.white_move_time)]
+        return False,[]
+    def white_wins(self):
+        return self.game_status == "Whites win"
 
 
 def build_tree_game(root_node: Leaf = None, max_depth: int = 0):
@@ -125,12 +130,32 @@ def build_tree_game(root_node: Leaf = None, max_depth: int = 0):
                     move=k,
                     moves_without_capture=root_node.moves_without_capture,
                     color=root_node.other_color(),
+                    alfabeta=root_node.alfabeta
                 )
                 l.root = root_node
                 root_node.leafs.append(l)
                 build_tree_game(l, max_depth=max_depth)
+                if root_node.alfabeta:
+                    e = [leaf.evaluation for leaf in root_node.leafs]
+                    root_node.evaluation = max(e) if root_node.color == "white" else min(e)
+                    if root_node.root:
+                        # print(len(root_node.leafs),root_node.root.__hash__)
+                        if root_node.root.evaluation:
+                            cut =  root_node.root.evaluation > root_node.evaluation
+                            if cut and root_node.root.color == "black":
+                                pass
+                                # print("was here")
+                                break
+                            if not cut and root_node.root.color == "white":
+                                pass
+                                # print("was here")
+                                break
+                    # print(root_node.root.evaluation)
+                # build_tree_game(l, max_depth=max_depth)
         else:
             for l in root_node.leafs:
                 build_tree_game(l, max_depth=max_depth)
         e = [leaf.evaluation for leaf in root_node.leafs]
         root_node.evaluation = max(e) if root_node.color == "white" else min(e)
+        if root_node.root:
+            root_node.root.evaluation = root_node.evaluation
