@@ -42,15 +42,15 @@ if __name__ == "__main__":
         [Pawn("black", [4, 1]), Pawn("black", [2, 3]), Pawn("black", [4, 5]), Pawn("white", [5, 0]), Pawn("white", [5, 6])]
     )
         # get_available_captures(sim,sim[0])
-    queen = Pawn("white", [5, 2])
+    queen = Pawn("white", [6, 7])
     queen.is_queen = True
-    print_board(sim5)
+    print_board(sim3)
     # temp = [[2, 5], [4, 7]]
     # temp.extend([[2, 5], [0, 3]])
     # print(temp)
     # _, c = get_available_captures(sim4,queen)
     # print(c)
-    print(get_all_possible_moves('black', sim5+[queen]))
+    print(get_all_possible_moves('white', sim3+[queen]))
     # print(get_pawn_between(sim6, [7,2], [2,7]).print())
     # print(sim4+[queen])
     # print(get_pawn_moves(sim4, sim4[0]))
